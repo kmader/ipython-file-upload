@@ -59,6 +59,33 @@ Base64 data is synced to the ``data_base64``  member, decoded data can be
 obtained from ``data``.
 The name of the uploaded file is stored in ``filename``.
 
+This example shows how you can create a temporary file on the local file system which can be directly read
+
+.. code-block:: python
+
+    import fileupload, os, tempfile
+    def upload_as_file_widget(callback=None):
+        """Create an upload files button that prints the file name and file size.
+        """
+
+        _upload_widget = fileupload.FileUploadWidget()
+        def _virtual_file(change):
+            file_ext = os.path.splitext(change['owner'].filename)[-1]
+            print('Uploaded `{}`'.format(change['owner'].filename))
+            if callback is not None:
+                with tempfile.NamedTemporaryFile(suffix=file_ext) as f:
+                    f.write(change['owner'].data)
+                    callback(f.name)
+
+        _upload_widget.observe(_virtual_file, names='data')
+
+        return _upload_widget
+        
+    def file_info(in_path):
+        print('uploaded to ',in_path, 'infos', os.stat(in_path))
+        
+    upload_as_file_widget(file_info)
+
 Changelog
 ---------
 
